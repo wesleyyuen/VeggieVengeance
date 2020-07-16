@@ -1013,8 +1013,10 @@ void Fighter::y_position_update(float ms) {
 
 void Fighter::charging_up_power_punch() {
 	m_holding_too_much_timer += 0.5;
+	// Charging up
 	if (m_holding_power_punch_timer < MAX_POWER_PUNCH_DMG)
 		m_holding_power_punch_timer += POWER_PUNCH_CHARGE_RATE;
+	// Held too long, tired out
 	if (m_holding_too_much_timer >= 120) {
 		m_tired_out = true;
 		m_is_holding_power_punch = false;
@@ -1025,8 +1027,10 @@ void Fighter::charging_up_power_punch() {
 
 void Fighter::broccoli_charging_up_cauliflowers() {
 	m_holding_too_much_timer += 0.5;
+	// Charging up
 	if (m_broccoli_holding_cauliflowers_timer < MAX_CAULIFLOWERS_VELOCITY)
 		m_broccoli_holding_cauliflowers_timer += CAULIFLOWERS_CHARGE_RATE;
+	// Held too long, tired out
 	if (m_holding_too_much_timer >= 120) {
 		m_tired_out = true;
 		m_broccoli_is_holding_cauliflowers = false;
@@ -1037,8 +1041,10 @@ void Fighter::broccoli_charging_up_cauliflowers() {
 
 void Fighter::potato_charging_up_fries() {
 	m_holding_too_much_timer += 0.5;
+	// Charging up
 	if (m_potato_holding_fries_timer < MAX_CAULIFLOWERS_VELOCITY)
 		m_potato_holding_fries_timer += CAULIFLOWERS_CHARGE_RATE;
+	// Held too long, tired out
 	if (m_holding_too_much_timer >= 120) {
 		m_tired_out = true;
 		m_potato_is_holding_fries = false;
@@ -1207,16 +1213,18 @@ void Fighter::block(float ms) {
 
 Dash * Fighter::yam_dash_update(float ms) {
 	Dash * dashPtr = NULL;
-
+	// Init dash
 	if (m_yam_start_dashing) {
 		if (m_yam_dash_cooldown_ms <= 0.0) {
 			m_yam_dash_timer_ms = MAX_DASH_TIMER;
 		}
 		m_yam_start_dashing = false;
 	}
+	// Manage cooldown
 	if (m_yam_dash_cooldown_ms > 0.0) {
 		m_yam_dash_cooldown_ms -= ms;
 	}
+	// Start dash
 	if (m_yam_dash_timer_ms > 0.0) {
 		float target_ms_per_frame = 1000.f / 60.f;
 		float speed_scale = ms / target_ms_per_frame;
@@ -1282,6 +1290,7 @@ void Fighter::eggplant_emoji_update() {
 
 Emoji * Fighter::eggplant_spawn_emoji_update(float ms) {
 	Emoji * e = NULL;
+	// Spawn in new emoji
 	if (m_eggplant_spawn_emoji) {
 		if (m_eggplant_spawn_cooldown <= 0.0 && m_eggplant_emoji_count < MAX_EMOJI_COUNT) {
 			e = emoji();
@@ -1292,6 +1301,7 @@ Emoji * Fighter::eggplant_spawn_emoji_update(float ms) {
 		}
 		m_eggplant_spawn_emoji = false;
 	}
+	// Manage cooldown
 	if (m_eggplant_spawn_cooldown > 0.0) {
 		m_eggplant_spawn_cooldown -= ms;
 	}
@@ -1315,6 +1325,7 @@ void Fighter::eggplant_projectile_update(float ms) {
 		}
 		m_eggplant_shoot_emoji = false;
 	}
+	// Manage cooldown
 	if (m_eggplant_shoot_cooldown > 0.0) {
 		m_eggplant_shoot_cooldown -= ms;
 	}
@@ -1370,11 +1381,13 @@ void Fighter::broccoli_double_jump_update() {
 
 Uppercut * Fighter::broccoli_uppercut_update() {
 	Uppercut * u = NULL;
+	// Start Uppercut
 	if (m_broccoli_is_uppercutting && !m_broccoli_uppercut_on_cooldown) {
 		m_velocity_y = -BROCCOLI_UPPERCUT_VERT_VELO;
 		u = broccoliUppercut();
 		m_broccoli_uppercut_on_cooldown = true;
 	}
+	// Manage Cooldown
 	if (m_broccoli_uppercut_on_cooldown) {
 		if (m_broccoli_uppercut_cooldown >= BROCCOLI_MAX_UPPERCUT_COOLDOWN) {
 			m_broccoli_uppercut_on_cooldown = false;
@@ -1389,7 +1402,9 @@ Uppercut * Fighter::broccoli_uppercut_update() {
 
 Projectile * Fighter::broccoli_projectile_update() {
 	Projectile * p = NULL;
+	// Charging powerful projectile
 	if (m_broccoli_is_holding_cauliflowers) broccoli_charging_up_cauliflowers();
+	// Shoot charged projectile
 	else if (m_broccoli_is_shooting_charged_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 		p = new Projectile(get_id(), m_position, m_broccoli_holding_cauliflowers_timer, 10 + m_broccoli_holding_cauliflowers_timer, m_facing_front);
 		m_broccoli_cauliflowers_on_cooldown = true;
@@ -1397,10 +1412,12 @@ Projectile * Fighter::broccoli_projectile_update() {
 		m_broccoli_holding_cauliflowers_timer = 0;
 		m_broccoli_is_shooting_charged_cauliflowers = false;
 	}
+	// Shoot normal projectile
 	else if (m_broccoli_is_shooting_cauliflowers && !m_broccoli_cauliflowers_on_cooldown) {
 		p = new Projectile(get_id(), m_position, 0, 10, m_facing_front);
 		m_broccoli_cauliflowers_on_cooldown = true;
 	}
+	// Manage cooldown
 	if (m_broccoli_cauliflowers_on_cooldown) {
 		if (m_broccoli_cauliflowers_cooldown >= BROCCOLI_MAX_CAULIFLOWERS_COOLDOWN) {
 			m_broccoli_cauliflowers_on_cooldown = false;
@@ -1431,8 +1448,9 @@ Attack * Fighter::potato_update() {
 
 Bullet * Fighter::potato_bullet_update() {
 	Bullet * b = NULL;
-
+	// Charging powerful bullet
 	if (m_potato_is_holding_fries) potato_charging_up_fries();
+	// Shoot powerful bullet
 	else if (m_potato_is_shooting_charged_fries && !m_potato_fries_on_cooldown) {
 		b = new Bullet(get_id(), m_position, m_potato_holding_fries_timer, 10 + m_potato_holding_fries_timer, m_facing_front);
 		m_potato_fries_on_cooldown = true;
@@ -1440,10 +1458,12 @@ Bullet * Fighter::potato_bullet_update() {
 		m_potato_holding_fries_timer = 0;
 		m_potato_is_shooting_charged_fries = false;
 	}
+	// Shoot normal bullet
 	else if (m_potato_is_shooting_fries && !m_potato_fries_on_cooldown) {
 		b = new Bullet(get_id(), m_position, 0, 10, m_facing_front);
 		m_potato_fries_on_cooldown = true;
 	}
+	// Manage cooldowns
 	if (m_potato_fries_on_cooldown) {
 		if (m_potato_fries_cooldown >= POTATO_MAX_FRIES_COOLDOWN) {
 			m_potato_fries_on_cooldown = false;
@@ -1458,6 +1478,7 @@ Bullet * Fighter::potato_bullet_update() {
 
 Bomb * Fighter::potato_bomb_update() {
 	Bomb * b = NULL;
+	// Clear any bomb before attempting to make new ones
 	if (bomb_pointer != NULL) {
 		if (bomb_pointer->get_pointer_references() == 1) {
 			bomb_pointer->deincrement_pointer_references();
@@ -1468,6 +1489,7 @@ Bomb * Fighter::potato_bomb_update() {
 			m_potato_bomb_planted = false;
 		}
 	}
+	// Plant a bomb
 	else if (m_potato_is_planting_bomb && !m_potato_bomb_on_cooldown && !m_potato_bomb_planted) {
 		bomb_pointer = new Bomb(get_id(), m_position, 40, 300, POTATO_MAX_BOMB_TIMER);
 		b = bomb_pointer;
@@ -1475,6 +1497,7 @@ Bomb * Fighter::potato_bomb_update() {
 		m_potato_bomb_ticking = true;
 		m_potato_bomb_planted = true;
 	}
+	// Bomb explode
 	if (m_potato_explode_planted_bomb && m_potato_bomb_planted) {
 		Mix_PlayChannel(-1, Mix_LoadWAV(audio_path("bomb.wav")), 0);
 		bomb_pointer->m_damageEffect->m_hit_fighter = true;
@@ -1486,6 +1509,7 @@ Bomb * Fighter::potato_bomb_update() {
 		m_potato_bomb_ticking = false;
 		m_potato_bomb_selftimer = 0;
 	}
+	// Bomb tick down
 	if (m_potato_bomb_ticking) {
 		if (m_potato_bomb_selftimer >= POTATO_MAX_BOMB_TIMER) {
 			m_potato_bomb_ticking = false;
@@ -1495,6 +1519,7 @@ Bomb * Fighter::potato_bomb_update() {
 		else
 			m_potato_bomb_selftimer++;
 	}
+	// Manage cooldown
 	if (m_potato_bomb_on_cooldown) {
 		if (m_potato_bomb_cooldown >= POTATO_MAX_BOMB_COOLDOWN) {
 			m_potato_bomb_on_cooldown = false;
@@ -1527,6 +1552,7 @@ Attack * Fighter::punch_update() {
 		attack = punch();
 		m_punch_on_cooldown = true;
 	}
+	// Manage cooldown
 	if (m_punch_on_cooldown) {
 		if (punching_cooldown >= MAX_PUNCH_COOLDOWN) {
 			m_punch_on_cooldown = false;
